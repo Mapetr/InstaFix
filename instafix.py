@@ -166,8 +166,8 @@ async def parse_json_ld(post_id: str) -> dict:
         return {"error": "Server is blocked from Instagram"}
 
     json_ld = json.loads(json_ld.text())
-    if isinstance(json_ld_data, list):
-        json_ld_data = json_ld_data[0]
+    if isinstance(json_ld, list):
+        json_ld = json_ld[0]
 
     # Get embed_data from JSON-LD if embed is blocked
     username = json_ld["author"]["identifier"]["value"]
