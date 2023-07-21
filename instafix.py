@@ -1,11 +1,11 @@
 import asyncio
 import json
 import os
+import random
 import re
 import time
 from typing import Optional
 from urllib import parse
-import random
 
 import esprima
 import httpx
@@ -97,35 +97,14 @@ async def _get_data(post_id: str) -> Optional[dict]:
 
     # Get data from HTML
     embed_data = parse_embed(api_resp)
-    if "error" in embed_data or embed_data["shortcode_media"]["video_blocked"] is False:
+    if (
+        "error" not in embed_data
+        or embed_data["shortcode_media"]["video_blocked"] is False
+    ):
         return embed_data
 
-    # Get data from JSON-LD if video is blocked
-    json_ld = await parse_json_ld(post_id)
-    if type(json_ld) == list:
-        json_ld = json_ld[0]
-    video_data = json_ld.get("video")
-    if video_data:
-        if len(video_data) == 1:
-            embed_data["shortcode_media"]["node"] = {
-                "__typename": "GraphVideo",
-                "display_url": video_data[0]["contentUrl"],
-            }
-        else:
-            embed_data["shortcode_media"]["edge_sidecar_to_children"] = {
-                "edges": [
-                    {
-                        "node": {
-                            "__typename": "GraphVideo",
-                            "display_url": video["contentUrl"],
-                        }
-                    }
-                    for video in video_data
-                ]
-            }
-
-        embed_data["shortcode_media"]["video_blocked"] = False
-        return embed_data
+    # Get data from JSON-LD if embed is blocked
+    embed_data = await parse_json_ld(post_id)
 
     # Query data from GraphQL, if video is blocked
     if "GRAPHQL_PROXY" in os.environ:
@@ -175,12 +154,45 @@ def parse_embed(html: str) -> dict:
 
 async def parse_json_ld(post_id: str) -> dict:
     client = app.state.client
+
     resp = await client.get(f"https://www.instagram.com/p/{post_id}/")
+    if resp.status_code != 200:
+        return {"error": "Not found"}
+
     tree = HTMLParser(resp.text)
     json_ld = tree.css_first("script[type='application/ld+json']")
-    if json_ld:
-        return json.loads(json_ld.text())
-    return {}
+    if not json_ld:
+        return {"error": "Server is blocked from Instagram"}
+
+    json_ld = json.loads(json_ld.text())
+    if isinstance(json_ld_data, list):
+        json_ld_data = json_ld_data[0]
+
+    # Get embed_data from JSON-LD if embed is blocked
+    username = json_ld["author"]["identifier"]["value"]
+    caption = json_ld.get("articleBody", "")
+    embed_data = {
+        "shortcode_media": {
+            "owner": {"username": username},
+            "edge_media_to_caption": {"edges": [{"node": {"text": caption}}]},
+            "dimensions": {"height": None, "width": None},
+        }
+    }
+
+    video_data = json_ld.get("video")
+    if video_data:
+        embed_data["shortcode_media"]["edge_sidecar_to_children"] = {
+            "edges": [
+                {
+                    "node": {
+                        "__typename": "GraphVideo",
+                        "display_url": video["contentUrl"],
+                    }
+                }
+                for video in video_data
+            ]
+        }
+    return embed_data
 
 
 async def query_gql(post_id: str) -> dict:
@@ -260,7 +272,7 @@ async def read_item(request: Request, post_id: str, num: Optional[int] = None):
             "request": request,
             "title": "InstaFix",
             "url": post_url,
-            "description": "Sorry, this post isn't available.",
+            "description": f"Sorry, this post isn't available. [ERR: {data['error']}]",
         }
         return templates.TemplateResponse("base.html", ctx)
 
