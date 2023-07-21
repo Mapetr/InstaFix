@@ -100,7 +100,7 @@ async def _get_data(post_id: str) -> Optional[dict]:
     embed_data = parse_embed(api_resp)
     if (
         "error" not in embed_data
-        or embed_data["shortcode_media"]["video_blocked"] is False
+        and embed_data["shortcode_media"]["video_blocked"] is False
     ):
         return embed_data
 
