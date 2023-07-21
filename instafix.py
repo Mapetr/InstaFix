@@ -6,6 +6,7 @@ import re
 import time
 from typing import Optional
 from urllib import parse
+import gzip
 
 import esprima
 import httpx
@@ -60,9 +61,9 @@ async def get_data(post_id: str) -> Optional[dict]:
     data = c.get(post_id)
     if not data or data["expire"] < time.time():
         data = await _get_data(post_id)
-        c[post_id] = {"content": data, "expire": time.time() + (24 * 60 * 60)}
+        c[post_id] = {"content": gzip.compress(json.dumps(data).encode()), "expire": time.time() + (24 * 60 * 60)}
     else:
-        data = data["content"]
+        data = json.loads(gzip.decompress(data["content"]))
     data = data.get("data", data)
     return data
 
