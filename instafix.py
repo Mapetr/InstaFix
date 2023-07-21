@@ -176,7 +176,6 @@ async def parse_json_ld(post_id: str) -> dict:
         "shortcode_media": {
             "owner": {"username": username},
             "edge_media_to_caption": {"edges": [{"node": {"text": caption}}]},
-            "dimensions": {"height": None, "width": None},
         }
     }
 
@@ -188,6 +187,7 @@ async def parse_json_ld(post_id: str) -> dict:
                     "node": {
                         "__typename": "GraphVideo",
                         "display_url": video["contentUrl"],
+                        "dimensions": {"height": None, "width": None}
                     }
                 }
                 for video in video_data
