@@ -331,6 +331,25 @@ files = [
 test = ["pytest (>=6)"]
 
 [[package]]
+name = "fastwsgi"
+version = "0.0.9"
+description = ""
+category = "main"
+optional = false
+python-versions = ">=3.6"
+files = []
+develop = false
+
+[package.dependencies]
+click = ">=7.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/jamesroberts/fastwsgi"
+reference = "HEAD"
+resolved_reference = "5572bb31b859d690be225707b9e7e25af397544b"
+
+[[package]]
 name = "guardpost"
 version = "0.0.9"
 description = "Basic framework to handle authentication and authorization in any kind of Python application."
@@ -1149,4 +1168,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8"
-content-hash = "11afb3d09a327566371c9cf0c10fc80406dbe9d603438ef0970495c6239add6e"
+content-hash = "ae1761dd4b50805b34bdddffcb6d206ad622a96a663016b79354cbb6fceae8c9"

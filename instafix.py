@@ -6,6 +6,7 @@ from typing import Optional
 from urllib.parse import urljoin
 
 import esprima
+import fastwsgi
 import httpx
 import orjson
 import pyvips
@@ -13,6 +14,7 @@ import sentry_sdk
 import tenacity
 from blacksheep import Application, Request, file, html, json, redirect
 from blacksheep.server.templating import use_templates
+from blacksheep.utils.aio import get_running_loop
 from diskcache import Cache
 from jinja2 import FileSystemLoader
 from selectolax.lexbor import LexborHTMLParser
@@ -454,3 +456,9 @@ async def grid(post_id: str):
 @app.route("/health")
 def healthcheck():
     return "200"
+
+
+if __name__ == "__main__":
+    loop = get_running_loop()
+    loop.run_until_complete(app.start())
+    fastwsgi.run(app, host="127.0.0.1", port=3000)
