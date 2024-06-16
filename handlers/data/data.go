@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"instafix/utils"
+	"math/rand"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -21,14 +23,10 @@ import (
 	"golang.org/x/net/html"
 )
 
+var ProxyFilePath string
+
 var gjsonNil = gjson.Result{}
 
-var client = &fasthttp.Client{
-	Dial:               fasthttpproxy.FasthttpProxyHTTPDialerTimeout(5 * time.Second),
-	ReadBufferSize:     16 * 1024,
-	MaxConnsPerHost:    1024,
-	MaxConnWaitTimeout: 5 * time.Second,
-}
 var timeout = 10 * time.Second
 
 var (
@@ -137,6 +135,14 @@ func (i *InstaData) GetData(postID string) error {
 }
 
 func getData(postID string) (gjson.Result, error) {
+	socksProxy := getRandomProxy()
+	client := &fasthttp.Client{
+		Dial:               fasthttpproxy.FasthttpSocksDialer("socks5://" + socksProxy),
+		ReadBufferSize:     16 * 1024,
+		MaxConnsPerHost:    1024,
+		MaxConnWaitTimeout: 5 * time.Second,
+	}
+
 	req, res := fasthttp.AcquireRequest(), fasthttp.AcquireResponse()
 	defer func() {
 		fasthttp.ReleaseRequest(req)
@@ -297,6 +303,14 @@ func parseEmbedHTML(embedHTML []byte) (string, error) {
 }
 
 func parseGQLData(postID string, req *fasthttp.Request, res *fasthttp.Response) ([]byte, error) {
+	socksProxy := getRandomProxy()
+	client := &fasthttp.Client{
+		Dial:               fasthttpproxy.FasthttpSocksDialer("socks5://" + socksProxy),
+		ReadBufferSize:     16 * 1024,
+		MaxConnsPerHost:    1024,
+		MaxConnWaitTimeout: 5 * time.Second,
+	}
+
 	req.Reset()
 	res.Reset()
 
@@ -316,4 +330,21 @@ func parseGQLData(postID string, req *fasthttp.Request, res *fasthttp.Response) 
 		return nil, err
 	}
 	return res.Body(), nil
+}
+
+func getRandomProxy() string {
+	if ProxyFilePath == "" {
+		return ""
+	}
+	proxies, err := os.ReadFile(ProxyFilePath)
+	if err != nil {
+		log.Error().Err(err).Msg("Failed to read proxy file")
+		return ""
+	}
+	proxyList := strings.Split(string(proxies), "\n")
+	if len(proxyList) == 0 {
+		return ""
+	}
+	randIndex := rand.Intn(len(proxyList))
+	return proxyList[randIndex]
 }

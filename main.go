@@ -60,6 +60,7 @@ func init() {
 func main() {
 	listenAddr := flag.String("listen", "0.0.0.0:3000", "Address to listen on")
 	gridCacheSize := flag.String("grid-cache-size", "25GB", "Grid cache size")
+	proxyFilePath := flag.String("proxy-file", "", "Proxy file path")
 	flag.Parse()
 
 	app := fiber.New()
@@ -80,6 +81,9 @@ func main() {
 	// Initialize zerolog
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.SetGlobalLevel(zerolog.DebugLevel)
+
+	// Set proxy file
+	data.ProxyFilePath = *proxyFilePath
 
 	// Parse grid-cache-size
 	gridCacheSizeParsed, err := byteSizeStrToInt(*gridCacheSize)
