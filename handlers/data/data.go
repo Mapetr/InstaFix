@@ -12,6 +12,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/PurpleSec/escape"
+	_ "github.com/bdandy/go-socks4"
 	"github.com/cockroachdb/pebble"
 	"github.com/kelindar/binary"
 	"github.com/rs/zerolog/log"
@@ -142,7 +143,7 @@ func getData(postID string) (gjson.Result, error) {
 	}
 	socksProxy := getRandomProxy()
 	if socksProxy != "" {
-		client.Dial = fasthttpproxy.FasthttpSocksDialer("socks5://" + socksProxy)
+		client.Dial = fasthttpproxy.FasthttpSocksDialer(socksProxy)
 	}
 
 	req, res := fasthttp.AcquireRequest(), fasthttp.AcquireResponse()
@@ -312,7 +313,7 @@ func parseGQLData(postID string, req *fasthttp.Request, res *fasthttp.Response) 
 	}
 	socksProxy := getRandomProxy()
 	if socksProxy != "" {
-		client.Dial = fasthttpproxy.FasthttpSocksDialer("socks5://" + socksProxy)
+		client.Dial = fasthttpproxy.FasthttpSocksDialer(socksProxy)
 	}
 
 	req.Reset()

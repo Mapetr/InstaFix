@@ -7,6 +7,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.9.1
 	github.com/PurpleSec/escape v1.0.0
 	github.com/ansrivas/fiberprometheus/v2 v2.6.1
+	github.com/bdandy/go-socks4 v1.2.3
 	github.com/cockroachdb/pebble v1.1.0
 	github.com/gofiber/fiber/v2 v2.52.2
 	github.com/kelindar/binary v1.0.19
@@ -24,6 +25,7 @@ require (
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
+	github.com/bdandy/go-errors v1.2.2 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
