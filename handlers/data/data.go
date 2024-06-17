@@ -135,12 +135,14 @@ func (i *InstaData) GetData(postID string) error {
 }
 
 func getData(postID string) (gjson.Result, error) {
-	socksProxy := getRandomProxy()
 	client := &fasthttp.Client{
-		Dial:               fasthttpproxy.FasthttpSocksDialer("socks5://" + socksProxy),
 		ReadBufferSize:     16 * 1024,
 		MaxConnsPerHost:    1024,
 		MaxConnWaitTimeout: 5 * time.Second,
+	}
+	socksProxy := getRandomProxy()
+	if socksProxy != "" {
+		client.Dial = fasthttpproxy.FasthttpSocksDialer("socks5://" + socksProxy)
 	}
 
 	req, res := fasthttp.AcquireRequest(), fasthttp.AcquireResponse()
@@ -303,12 +305,14 @@ func parseEmbedHTML(embedHTML []byte) (string, error) {
 }
 
 func parseGQLData(postID string, req *fasthttp.Request, res *fasthttp.Response) ([]byte, error) {
-	socksProxy := getRandomProxy()
 	client := &fasthttp.Client{
-		Dial:               fasthttpproxy.FasthttpSocksDialer("socks5://" + socksProxy),
 		ReadBufferSize:     16 * 1024,
 		MaxConnsPerHost:    1024,
 		MaxConnWaitTimeout: 5 * time.Second,
+	}
+	socksProxy := getRandomProxy()
+	if socksProxy != "" {
+		client.Dial = fasthttpproxy.FasthttpSocksDialer("socks5://" + socksProxy)
 	}
 
 	req.Reset()
