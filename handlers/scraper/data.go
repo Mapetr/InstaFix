@@ -236,7 +236,8 @@ func (i *InstaData) ScrapeData() error {
 	var gqlData gjson.Result
 	videoBlocked := strings.Contains(utils.B2S(body), "WatchOnInstagram")
 	// Scrape from GraphQL API only if video is blocked or embed data is empty
-	if videoBlocked || len(body) == 0 {
+	if videoBlocked || len(body) == 0 || embedData.String() == "" {
+		slog.Debug("Scraping from GQL")
 		gqlValue, err := scrapeFromGQL(i.PostID)
 		if err != nil {
 			slog.Error("Failed to scrape data from scrapeFromGQL", "postID", i.PostID, "err", err)
@@ -382,28 +383,28 @@ func scrapeFromGQL(postID string) ([]byte, error) {
 		"__d":                      {"www"},
 		"__user":                   {"0"},
 		"__a":                      {"1"},
-		"__req":                    {"k"},
-		"__hs":                     {"19888.HYP:instagram_web_pkg.2.1..0.0"},
-		"dpr":                      {"2"},
+		"__req":                    {"3"},
+		"__hs":                     {"19932.HYP:instagram_web_pkg.2.1..0.0"},
+		"dpr":                      {"1"},
 		"__ccg":                    {"UNKNOWN"},
-		"__rev":                    {"1014227545"},
-		"__s":                      {"trbjos:n8dn55:yev1rm"},
-		"__hsi":                    {"7380500578385702299"},
-		"__dyn":                    {"7xeUjG1mxu1syUbFp40NonwgU7SbzEdF8aUco2qwJw5ux609vCwjE1xoswaq0yE6ucw5Mx62G5UswoEcE7O2l0Fwqo31w9a9wtUd8-U2zxe2GewGw9a362W2K0zK5o4q3y1Sx-0iS2Sq2-azo7u3C2u2J0bS1LwTwKG1pg2fwxyo6O1FwlEcUed6goK2O4UrAwCAxW6Uf9EObzVU8U"},
-		"__csr":                    {"n2Yfg_5hcQAG5mPtfEzil8Wn-DpKGBXhdczlAhrK8uHBAGuKCJeCieLDyExenh68aQAKta8p8ShogKkF5yaUBqCpF9XHmmhoBXyBKbQp0HCwDjqoOepV8Tzk8xeXqAGFTVoCciGaCgvGUtVU-u5Vp801nrEkO0rC58xw41g0VW07ISyie2W1v7F0CwYwwwvEkw8K5cM0VC1dwdi0hCbc094w6MU1xE02lzw"},
+		"__rev":                    {"1015209738"},
+		"__s":                      {"brhtiw:l5n1wb:np41sm"},
+		"__hsi":                    {"7396680363937790600"},
+		"__dyn":                    {"7xeUjG1mxu1syUbFp41twpUnwgU7SbzEdF8aUco2qwJw5ux609vCwjE1xoswaq0yE6ucw5Mx62G5UswoEcE7O2l0Fwqo31w9O1TwQzXwae4UaEW2G0AEco5G0zK5o4q3y1Sx-0iS2S3qazo7u3C2u2J0bS1LwTwKG1pg2fwxyo6O1FwlEcUed6goK2O4UrAwCAxW6Uf9EO2e2e1ew"},
+		"__csr":                    {"h42ezsheh6ibGihnhnVAXGD_niApaBihahpAUXJ3rhoy9KvhpUCurXFacx2HAzbzqGh6yUSt4AS-9BBjKcizay_Vcxby8hG9V8K5V9uhCByGmq4ayKlx24qK64hxSdByuu49oKmuV8018AHjwYwAzk0OQ0eIwkC1tyo6Gq5yGq1-g1uo0ab6bU7a1aIAMdo755CgBF05LwnZC55gDc0gq3258aiGfiaFwC5-1xzUzCwaKOo66dg0grxe16g4y4U0axE05B2"},
 		"__comet_req":              {"7"},
-		"lsd":                      {"AVoPBTXMX0Y"},
-		"jazoest":                  {"2882"},
-		"__spin_r":                 {"1014227545"},
+		"lsd":                      {"AVra4r-pLUM"},
+		"jazoest":                  {"2923"},
+		"__spin_r":                 {"1015209738"},
 		"__spin_b":                 {"trunk"},
-		"__spin_t":                 {"1718406700"},
+		"__spin_t":                 {"1722173850"},
 		"fb_api_caller_class":      {"RelayModern"},
 		"fb_api_req_friendly_name": {"PolarisPostActionLoadPostQueryQuery"},
 		"variables":                {`{"shortcode":"` + postID + `","fetch_comment_count":40,"parent_comment_count":24,"child_comment_count":3,"fetch_like_count":10,"fetch_tagged_user_count":null,"fetch_preview_comment_count":2,"has_threaded_comments":true,"hoisted_comment_id":null,"hoisted_reply_id":null}`},
 		"server_timestamps":        {"true"},
 		"doc_id":                   {"25531498899829322"},
 	}
-	req, err := http.NewRequest("POST", "https://www.instagram.com/graphql/query/", strings.NewReader(gqlParams.Encode()))
+	req, err := http.NewRequest("POST", "https://www.instagram.com/graphql/query", strings.NewReader(gqlParams.Encode()))
 	if err != nil {
 		return nil, err
 	}
@@ -423,9 +424,9 @@ func scrapeFromGQL(postID string) ([]byte, error) {
 		"Sec-Fetch-Dest":              {"empty"},
 		"Sec-Fetch-Mode":              {"cors"},
 		"Sec-Fetch-Site":              {"same-origin"},
-		"User-Agent":                  {"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"},
+		"User-Agent":                  {"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36"},
 		"X-Asbd-Id":                   {"129477"},
-		"X-Bloks-Version-Id":          {"e2004666934296f275a5c6b2c9477b63c80977c7cc0fd4b9867cb37e36092b68"},
+		"X-Bloks-Version-Id":          {"165b590a165c34e5a3bc20fc9f898b42f79ec60dd01e449dbee3ed8558d41987"},
 		"X-Fb-Friendly-Name":          {"PolarisPostActionLoadPostQueryQuery"},
 		"X-Ig-App-Id":                 {"936619743392459"},
 	}
