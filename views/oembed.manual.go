@@ -10,7 +10,7 @@ import (
 const (
 	oembed__0 = `{"author_name": `
 	oembed__1 = `,"author_url": "`
-	oembed__2 = `","provider_name": "InstaFix","provider_url": "https://github.com/Wikidepia/InstaFix","title": "Instagram","type": "link","version": "1.0"}`
+	oembed__2 = `","provider_name": "InstaFix fork","provider_url": "https://github.com/Mapetr/InstaFix","title": "Instagram","type": "link","version": "1.0"}`
 )
 
 func OEmbed(o *model.OEmbedData, wr io.Writer) {
