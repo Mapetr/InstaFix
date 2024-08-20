@@ -209,6 +209,7 @@ func (i *InstaData) ScrapeData() error {
 
 	var embedData gjson.Result
 	var timeSliceData gjson.Result
+	var useGql bool
 	if len(body) > 0 {
 		// Pattern matching using LDE
 		l := &Line{}
@@ -244,15 +245,21 @@ func (i *InstaData) ScrapeData() error {
 		embedHTML, err := scrapeFromEmbedHTML(body)
 		if err != nil {
 			slog.Warn("Failed to parse data from scrapeFromEmbedHTML", "postID", i.PostID, "err", err)
+			useGql = true
 		} else {
 			embedData = gjson.Parse(embedHTML)
 		}
+	} else {
+		useGql = true
 	}
 
 	var gqlData gjson.Result
-	videoBlocked := bytes.Contains(body, []byte("WatchOnInstagram"))
+	if bytes.Contains(body, []byte("WatchOnInstagram")) {
+		useGql = true
+	}
 	// Scrape from GraphQL API only if video is blocked or embed data is empty
-	if videoBlocked || len(body) == 0 || embedData.String() == "" {
+	if useGql {
+		slog.Debug("Using GQL")
 		gqlValue, err := scrapeFromGQL(i.PostID)
 		if err != nil {
 			slog.Error("Failed to scrape data from scrapeFromGQL", "postID", i.PostID, "err", err)
